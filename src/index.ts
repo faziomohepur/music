@@ -158,14 +158,26 @@ const HTML_PAGE = `<!DOCTYPE html>
       });
     }
 
-    function playSong(index) {
-      currentIndex = index;
-      const song = songs[index];
-      audio.src = song.url;
-      audio.play();
-      nowPlaying.textContent = 'Đang phát: ' + song.title;
-      document.querySelectorAll('.playlist li').forEach((li, i) => li.classList.toggle('active', i === index));
-    }
+    let userInteracted = false;
+
+	function playSong(index) {
+	  currentIndex = index;
+	  const song = songs[index];
+	  audio.src = song.url;
+	  nowPlaying.textContent = 'Đang phát: ' + song.title;
+
+	  document.querySelectorAll('.playlist li').forEach((li, i) => {
+		li.classList.toggle('active', i === index);
+	  });
+
+	  // play() trả về Promise — có thể bị browser chặn nếu chưa có tương tác
+	  audio.play().catch(() => {
+		if (!userInteracted) {
+		  nowPlaying.textContent = '👆 Bấm play để nghe: ' + song.title;
+		}
+	  });
+	}
+
 
     function formatSize(bytes) {
       if (bytes < 1024) return bytes + ' B';
@@ -173,8 +185,19 @@ const HTML_PAGE = `<!DOCTYPE html>
       return (bytes / 1048576).toFixed(1) + ' MB';
     }
 
-    audio.addEventListener('ended', () => { if (currentIndex < songs.length - 1) playSong(currentIndex + 1); });
-    loadSongs();
+		// Tự phát bài tiếp theo khi kết thúc
+	audio.addEventListener('ended', () => {
+	  if (currentIndex < songs.length - 1) {
+		playSong(currentIndex + 1);
+	  }
+	});
+
+	// Đánh dấu đã có tương tác — sau click đầu tiên browser cho phép autoplay
+	document.addEventListener('click', () => { userInteracted = true; }, { once: true });
+
+	// Khởi động
+	loadSongs();
+
   </script>
 </body>
 </html>`;
