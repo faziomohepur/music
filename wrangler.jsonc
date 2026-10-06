@@ -1,0 +1,11 @@
+{
+  "name": "music-player",
+  "compatibility_date": "2025-09-25",
+  "main": "src/index.ts",
+  "r2_buckets": [
+    {
+      "binding": "MUSIC_BUCKET",
+      "bucket_name": "nhac-mp3"
+    }
+  ]
+}
